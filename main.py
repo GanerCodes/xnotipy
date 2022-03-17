@@ -113,10 +113,10 @@ if __name__ == "__main__":
         geometry = (52, 5, -25, 25),
         shrink = False,
         border_width = 1,
+        image = "/home/ganer/Media/Image/hehe/4419826351_1647281775807.png",
         cmd = Notification(
             "hey",
             cmd = ["chromium", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
         ),
-        image = "/home/ganer/Media/Image/hehe/4419826351_1647281775807.png",
     )
     n.activate()
