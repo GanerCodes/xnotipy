@@ -42,7 +42,7 @@ class Notification:
     def get_value(self, x):
         return x[1] if isinstance(x, tuple) else None
     
-    def __init__(self, text = "", mouse_button = 0, monitor = 0, **para):
+    def __init__(self, text="", cmd=None, mouse_button=1, monitor=0, **para):
         self.mapping = {k: self.get_name(v) for k, v in self.all_options.items()}
         self.inverse_mapping = {v: k for k, v in self.mapping.items()}
         
@@ -52,6 +52,7 @@ class Notification:
         
         if self.para["tag"] is None:
             self.para["tag"] = str(randint(10 ** 8, 10 ** 10))
+    
         if isinstance(t := self.para["geometry"], tuple|list):
             self.para["geometry"] = "{}x{}{:+}{:+}".format(
                 t[0], t[1],
@@ -59,10 +60,14 @@ class Notification:
                 t[3] if len(t) > 3 else 0
             )
         
+        if cmd:
+            self.para["cmd"] = "1"
+        
         self.mouse_button = mouse_button
         self.has_set_resources = False
         self.monitor = monitor
         self.text = text
+        self.cmd = cmd
     
     def update_resources(self):
         with open(self.RESOURCE_FILE_NAME, "w") as f:
@@ -87,13 +92,20 @@ class Notification:
                 continue
             content += f"{k}:{m}\t"
             
-        content += f"{self.text}\n"
+        content += f"{self.text}"
         
         proc = Popen(
             [self.XNOTIFY_LOCATION, '-b', str(self.mouse_button), '-m', str(self.monitor)],
-            stdin=PIPE, env=environ
+            stdin=PIPE, stdout=PIPE, env=environ
         )
-        proc.stdin.write(content.encode())
+        if proc.communicate(content.encode())[0].decode().strip():
+            if isinstance(self.cmd, Notification):
+                self.cmd.activate()
+            elif isinstance(self.cmd, str|list|tuple):
+                Popen(self.cmd)
+            elif callable(self.cmd):
+                self.cmd()
+        
 
 if __name__ == "__main__":
     n = Notification(
@@ -101,7 +113,10 @@ if __name__ == "__main__":
         geometry = (52, 5, -25, 25),
         shrink = False,
         border_width = 1,
-        cmd = "asd",
+        cmd = Notification(
+            "hey",
+            cmd = ["chromium", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+        ),
         image = "/home/ganer/Media/Image/hehe/4419826351_1647281775807.png",
     )
     n.activate()
