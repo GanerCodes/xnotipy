@@ -1,5 +1,5 @@
 #!/usr/bin/python 
-from os import environ
+from os import environ, fork
 from os.path import expanduser, realpath, join as path_join, split as path_split
 from subprocess import PIPE, Popen
 from random import randint
@@ -105,7 +105,10 @@ class Notification:
                 Popen(self.cmd)
             elif callable(self.cmd):
                 self.cmd()
-        
+    
+    def background_activate(self, *args, **kwargs):
+        if fork() == 0:
+            self.activate()
 
 if __name__ == "__main__":
     n = Notification(
@@ -119,4 +122,4 @@ if __name__ == "__main__":
             cmd = ["chromium", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
         ),
     )
-    n.activate()
+    n.background_activate()
