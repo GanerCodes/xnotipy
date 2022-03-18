@@ -1,5 +1,5 @@
 #!/usr/bin/python 
-from os import environ, fork
+from os import environ
 from os.path import expanduser, realpath, join as path_join, split as path_split
 from subprocess import PIPE, Popen
 from random import randint
@@ -81,7 +81,7 @@ class Notification:
         
         Popen(["xrdb", Xresources_loc, "-merge", self.RESOURCE_FILE_NAME]).wait()
     
-    def activate(self, force_refresh_resources = False):
+    def run(self, force_refresh_resources = False):
         if not self.has_set_resources or force_refresh_resources:
             self.update_resources()
             self.has_set_resources = True
@@ -100,15 +100,20 @@ class Notification:
         )
         if proc.communicate(content.encode())[0].decode().strip():
             if isinstance(self.cmd, Notification):
-                self.cmd.activate()
+                self.cmd.run()
             elif isinstance(self.cmd, str|list|tuple):
                 Popen(self.cmd)
             elif callable(self.cmd):
                 self.cmd()
     
-    def background_activate(self, *args, **kwargs):
+    def thread_run(self, *args, **kwargs):
+        from threading import Thread
+        Thread(target=self.run, args=args, kwargs=kwargs).start()
+    
+    def background_run(self, *args, **kwargs):
+        from os import fork
         if fork() == 0:
-            self.activate()
+            self.run(*args, **kwargs)
 
 if __name__ == "__main__":
     n = Notification(
@@ -122,4 +127,4 @@ if __name__ == "__main__":
             cmd = ["chromium", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
         ),
     )
-    n.background_activate()
+    n.background_run()

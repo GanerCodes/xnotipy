@@ -1,8 +1,9 @@
 xnotify.background: #000000
 xnotify.foreground: #FFFFFF
 xnotify.border: #FFFFFF
-xnotify.borderWidth: 1px
-xnotify.shrink: true
+xnotify.borderWidth: 1
+xnotify.shrink: false
 xnotify.wrap: true
 xnotify.alignment: center
+xnotify.geometry: 52x5-25+25
 xnotify.gravity: NE
