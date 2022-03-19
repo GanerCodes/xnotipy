@@ -114,6 +114,7 @@ class Notification:
         from os import fork
         if fork() == 0:
             self.run(*args, **kwargs)
+            exit(0)
 
 if __name__ == "__main__":
     n = Notification(
